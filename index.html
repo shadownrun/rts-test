@@ -1,182 +1,30 @@
 <!DOCTYPE html>
-<!-- saved from url=(0030)http://www.wab.com/?screen=232 -->
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"> 
-<script>
-/*------------------------------------------------------------------------------
-Copyright (c) 2011 Antoine Santo Aka NoNameNo
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="viewport" content="user-scalable=0, initial-scale=1.0" />
 
-This File is part of the CODEF project.
+        <title>Ω500 game template</title>
 
-More info : http://codef.santo.fr
-Demo gallery http://www.wab.com
+        <link rel="stylesheet" href="res/main.css">
+    </head>
+    <body>
+        <section>
+            <canvas id="board"></canvas>
+        </section>
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+        <!-- Ω500 lib -->
+        <script src="lib/Ω500.js"></script>
 
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
+        <!-- Game -->
+        <script src="src/game.js"></script>
+        <script src="src/entities/Player.js"></script>
+        <script src="src/screens/MainScreen.js"></script>
+        <script src="src/screens/TitleScreen.js"></script>
+        <script>
+            var game = new OmegaGame(640, 480);
+        </script>
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-------------------------------------------------------------------------------
-
-Original version of the file http%3A%2F%2Fwww.wab.com%2F%3Fscreen%3D232
-credits to all code CODEF and Xtream
-*/
-</script>
-<meta property="og:description" content="Please use Chrome or Chromium for perf and sound...">
-<meta property="og:site_name" content="shadownrun.tk">
-
-		<script src="./intro/codef_core.js"></script> 
-		<script src="./intro/codef_music.js"></script>
-		<script src="./intro/codef_scrolltext.js"></script>
-		<script src="./intro/codef_starfield.js"></script>
-		
-		<script src="./intro/codef_stats.js"></script> 
-		
-		<script> 
-		var basepath = 'intro/';
-		
-		var mywidth = 1000;
-		var myheight = 600;
-		
-		var mycanvas, mycanvas_spectrum;
-				
-			var resX = mywidth, resY = myheight;			
-			var astlogo = new image(basepath + 'shadowrun.png');
-			
-			
-			var t = 0;
-			
-			var player = new music("XM");
-			player.LoadAndRun(basepath + 'tmission.xm');
-			
-			var NB_BARS = 128;
-			var spectrumHigh = 480;
-			
-			
-		function RGB2Color(r)  {
-			return '#' + byte2Hex(25) + byte2Hex(50) + byte2Hex(r+50);
-		}		
-		  
-		function byte2Hex(n) {
-			var nybHexString = "0123456789ABCDEF";
-			return String(nybHexString.substr((n >> 4) & 0x0F,1)) + nybHexString.substr(n & 0x0F,1);
-		}
-		
-		function cre_analyzer() {
-
-				if (player.loader.player) {
-					player.loader.player.analyse = true ;    
-					node = player.loader.player.context.createAnalyser();
-					node.fftSize = 1024;
-
-					try {
-						player.loader.player.node.connect(node);
-						node.connect(player.loader.player.context.destination);		  
-						ana_cre = 1 ;
-					} catch(err) {}
-			}
-		}
-		
-		function do_audio() {
-			mycanvas_spectrum.clear();
-
-			if ((player.loader.player) && (player.loader.player.voices) ) {
-				if ( ana_cre == 0 ) { 
-					cre_analyzer() ;
-				} 	else {
-					var fb = new Uint8Array( node.frequencyBinCount );
-					node.getByteFrequencyData( fb );
-					var bin_size = Math.floor(fb.length / NB_BARS);
-			 
-					for (var i=0; i < NB_BARS; ++i) {
-						var sum = 0;
-							for (var j=0; j < bin_size; ++j) {
-								sum += fb[(i * bin_size) + j];
-							}
-							
-							var average = ((sum / bin_size) * spectrumHigh)/256;
-							var bar_width = mywidth / NB_BARS;
-
-							if ((i>0) && (i<NB_BARS-1)) {
-								mycanvas_spectrum.quad(i*bar_width, spectrumHigh, (i+1)*bar_width-1, spectrumHigh,(i+1)*bar_width-1, spectrumHigh-average, i*bar_width, spectrumHigh-average, RGB2Color(average/2)) ;
-							}
-					}
-				}
-			}
-		}
-			
-			function init(){
-				//addstats();
-				mycanvas=new canvas(mywidth,myheight,"main");
-				mystarfield=new starfield3D(mycanvas, 500, 2, mywidth,myheight, mywidth/2, myheight/2,'#FF0000', 100,0,0);
-				astlogo.setmidhandle();
-				fullscr();
-				mycanvas_spectrum = new canvas(myheight, spectrumHigh) ;
-				mycanvas_spectrum.setmidhandle();	
-				ana_cre = 0;			
-				
-				go();
-			}
-
-			function go(){
-				t +=0.007;
-				mycanvas.fill('#000000');
-				mystarfield.draw();
-
-				do_audio() ;
-			
-				mycanvas_spectrum.draw(mycanvas,61,mywidth/2-200, 1, 90, 1, 0.25);
-				mycanvas_spectrum.draw(mycanvas,mywidth-61,myheight/2-5, 1, 270, -1, 0.25);
-				
-				astlogo.draw(mycanvas, resX/2, resY/2 - 25, 1, 0);
-				
-				
-				//updatestats();						
-				
-				requestAnimFrame( go );
-			}
- 
- 
- function fullscr() {
-			if (mycanvas.requestFullscreen) {
-				mycanvas.requestFullscreen();
-			} else if (mycanvas.mozRequestFullScreen) {
-				mycanvas.mozRequestFullScreen();
-			} else if (mycanvas.webkitRequestFullScreen) {
-				mycanvas.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
-			}
-		}
-		</script>
-<style type="text/css"> 
-			body {
-				margin: 0;
-				padding: 0;
-				font-family: Helvetica;
-			}
-			#realbody {
-				top: 0;
-				width: 100%;
-				overflow: auto;
-				max-height: 100%;
-			}
-		</style> 
-</head> 
-<body onload="init();" bgcolor="#000000">
-		<div id="realbody"> 
-			<div class="page"> 
-				<br>
-<div><br>
-<center><div id="main"></div>
-</center>
-</body></html>
+    </body>
+</html>
