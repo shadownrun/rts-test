@@ -1,0 +1,16 @@
+{
+	"data": {
+		"tileset": "tileset",
+		"ox": 20,
+		"oy": 15,
+		"layer1": [],
+		"layer2": [],
+		"layer3": []
+	},
+	"events": [{
+		"name": "EV001",
+		"x": 0,
+		"y": 0,
+		"list": []
+	}]
+}
